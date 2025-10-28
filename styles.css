@@ -459,7 +459,7 @@ section {
 }
 
 .youtube-section .section-title::after {
-    background: linear-gradient(90deg, #fbbf24, #ff0000);
+    background: linear-gradient(90deg, #24ccfb, #bd5de6);
 }
 
 .youtube-content {
