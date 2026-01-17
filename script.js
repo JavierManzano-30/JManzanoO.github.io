@@ -15,6 +15,48 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Mobile navigation toggle
 const navToggle = document.getElementById('nav-toggle');
 const navMenu = document.getElementById('nav-menu');
+const themeToggle = document.getElementById('theme-toggle');
+
+function updateThemeToggle(theme) {
+    if (!themeToggle) {
+        return;
+    }
+
+    const isLight = theme === 'light';
+    themeToggle.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+    themeToggle.setAttribute('aria-label', isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+    themeToggle.innerHTML = isLight
+        ? '<i class="fas fa-moon" aria-hidden="true"></i>'
+        : '<i class="fas fa-sun" aria-hidden="true"></i>';
+}
+
+function setTheme(theme, persist = true) {
+    document.body.setAttribute('data-theme', theme);
+    updateThemeToggle(theme);
+    if (persist) {
+        localStorage.setItem('theme', theme);
+    }
+}
+
+if (themeToggle) {
+    const storedTheme = localStorage.getItem('theme');
+    const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)');
+    const initialTheme = storedTheme || (prefersLight && prefersLight.matches ? 'light' : 'dark');
+
+    setTheme(initialTheme, false);
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.body.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+        setTheme(nextTheme);
+    });
+
+    if (!storedTheme && prefersLight) {
+        prefersLight.addEventListener('change', (event) => {
+            setTheme(event.matches ? 'light' : 'dark', false);
+        });
+    }
+}
 
 navToggle.addEventListener('click', () => {
     const isActive = navMenu.classList.toggle('active');
@@ -32,16 +74,16 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 // Navbar background change on scroll
-window.addEventListener('scroll', () => {
+const updateNavbarState = () => {
     const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-        navbar.style.background = 'rgba(14, 15, 18, 0.85)';
-        navbar.style.borderBottomColor = 'rgba(77, 163, 255, 0.2)';
-    } else {
-        navbar.style.background = 'rgba(14, 15, 18, 0.7)';
-        navbar.style.borderBottomColor = 'rgba(255, 255, 255, 0.18)';
+    if (!navbar) {
+        return;
     }
-});
+    navbar.classList.toggle('is-scrolled', window.scrollY > 50);
+};
+
+window.addEventListener('scroll', updateNavbarState);
+updateNavbarState();
 
 // Intersection Observer for animations
 const observerOptions = {
